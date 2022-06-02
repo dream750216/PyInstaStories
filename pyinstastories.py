@@ -74,17 +74,14 @@ def login(username="", password=""):
 		else:
 			with open(settings_file) as file_data:
 				cached_settings = json.load(file_data, object_hook=from_json)
-
 			device_id = cached_settings.get('device_id')
 			# reuse auth settings
 			api = Client(
 				username, password,
 				settings=cached_settings)
-
-			print('[I] Using cached login cookie for "' + api.authenticated_user_name + '".')
-
+			#print(api.authenticated_user_name)
+#			print('[I] Using cached login cookie for "' + api.authenticated_user_name + '".')
 	except (ClientCookieExpiredError, ClientLoginRequiredError) as e:
-		print('[E] ClientCookieExpiredError/ClientLoginRequiredError: {0!s}'.format(e))
 
 		# Login expired
 		# Do relogin but use default ua, keys and such
@@ -96,18 +93,18 @@ def login(username="", password=""):
 		else:
 			print("[E] The login cookie has expired, but no login arguments were given.")
 			print("[E] Please supply --username and --password arguments.")
-			print('-' * 70)
+#			print('-' * 70)
 			sys.exit(0)
 
 	except ClientLoginError as e:
 		print('[E] Could not login: {:s}.\n[E] {:s}\n\n{:s}'.format(
 			json.loads(e.error_response).get("error_title", "Error title not available."),
 			json.loads(e.error_response).get("message", "Not available"), e.error_response))
-		print('-' * 70)
+#		print('-' * 70)
 		sys.exit(9)
 	except ClientError as e:
 		print('[E] Client Error: {:s}'.format(e.error_response))
-		print('-' * 70)
+#		print('-' * 70)
 		sys.exit(9)
 	except Exception as e:
 		if str(e).startswith("unsupported pickle protocol"):
@@ -115,10 +112,10 @@ def login(username="", password=""):
 			print("[W] Please delete your cookie file 'credentials.json' and try again.")
 		else:
 			print('[E] Unexpected Exception: {0!s}'.format(e))
-		print('-' * 70)
+#		print('-' * 70)
 		sys.exit(99)
 
-	print('[I] Login to "' + api.authenticated_user_name + '" OK!')
+#	print('[I] Login to "' + api.authenticated_user_name + '" OK!')
 	cookie_expiry = api.cookie_jar.auth_expires
 	print('[I] Login cookie expiry date: {0!s}'.format(
 		datetime.datetime.fromtimestamp(cookie_expiry).strftime('%Y-%m-%d at %I:%M:%S %p')))
@@ -132,8 +129,8 @@ def login(username="", password=""):
 def check_directories(user_to_check):
 	global download_dest
 	try:
-		if not os.path.isdir(download_dest + "/stories/{}/".format(user_to_check)):
-			os.makedirs(download_dest + "/stories/{}/".format(user_to_check))
+		if not os.path.isdir(download_dest + "/{}/".format(user_to_check)):
+			os.makedirs(download_dest + "/{}/".format(user_to_check))
 		return True
 	except Exception as e:
 		print(str(e))
@@ -144,11 +141,11 @@ def get_media_story(user_to_check, user_id, ig_client, taken_at=False, no_video_
 	global download_dest
 	if hq_videos and command_exists("ffmpeg"):
 		print("[I] Downloading high quality videos enabled. Ffmpeg will be used.")
-		print('-' * 70)
+#		print('-' * 70)
 	elif hq_videos and not command_exists("ffmpeg"):
 		print("[W] Downloading high quality videos enabled but Ffmpeg could not be found. Falling back to default.")
 		hq_videos = False
-		print('-' * 70)
+#		print('-' * 70)
 	try:
 		try:
 			feed = ig_client.user_story_feed(user_id)
@@ -214,18 +211,18 @@ def get_media_story(user_to_check, user_id, ig_client, taken_at=False, no_video_
 
 		if hq_videos:
 			print("[I] Downloading video stories. ({:d} stories detected)".format(len(list_video_v)))
-			print('-' * 70)
+#			print('-' * 70)
 			for index, video in enumerate(list_video_v):
 				filename = video[0].split('/')[-1]
 				if taken_at:
 					try:
-						final_filename = video[1] + ".mp4"
+						final_filename = "{}".format(user_to_check) + "_" + video[1] + ".mp4"
 					except:
-						final_filename = filename.split('.')[0] + ".mp4"
+						final_filename = "{}".format(user_to_check) + "_" + filename.split('.')[0] + ".mp4"
 						print("[E] Could not determine timestamp filename for this file, using default: ") + final_filename
 				else:
-					final_filename = filename.split('.')[0] + ".mp4"
-				save_path_video = download_dest + "/stories/{}/".format(user_to_check) + final_filename.replace(".mp4", ".video.mp4")
+					final_filename = "{}".format(user_to_check) + "_" + filename.split('.')[0] + ".mp4"
+				save_path_video = download_dest + "/{}/".format(user_to_check) + final_filename.replace(".mp4", ".video.mp4")
 				save_path_audio = save_path_video.replace(".video.mp4", ".audio.mp4")
 				save_path_final = save_path_video.replace(".video.mp4", ".mp4")
 				if not os.path.exists(save_path_final):
@@ -273,18 +270,18 @@ def get_media_story(user_to_check, user_id, ig_client, taken_at=False, no_video_
 					print("[I] Story already exists: {:s}".format(final_filename))
 		else:
 			print("[I] Downloading video stories. ({:d} stories detected)".format(len(list_video)))
-			print('-' * 70)
+#			print('-' * 70)
 			for index, video in enumerate(list_video):
 				filename = video[0].split('/')[-1]
 				if taken_at:
 					try:
-						final_filename = video[1] + ".mp4"
+						final_filename = "{}".format(user_to_check) + "_" + video[1] + ".mp4"
 					except:
-						final_filename = filename.split('.')[0] + ".mp4"
+						final_filename = "{}".format(user_to_check) + "_" + filename.split('.')[0] + ".mp4"
 						print("[E] Could not determine timestamp filename for this file, using default: ") + final_filename
 				else:
-					final_filename = filename.split('.')[0] + ".mp4"
-				save_path = download_dest + "/stories/{}/".format(user_to_check) + final_filename
+					final_filename = "{}".format(user_to_check) + "_" + filename.split('.')[0] + ".mp4"
+				save_path = download_dest + "/{}/".format(user_to_check) + final_filename
 				if not os.path.exists(save_path):
 					print("[I] ({:d}/{:d}) Downloading video: {:s}".format(index+1, len(list_video), final_filename))
 					try:
@@ -296,20 +293,20 @@ def get_media_story(user_to_check, user_id, ig_client, taken_at=False, no_video_
 				else:
 					print("[I] Story already exists: {:s}".format(final_filename))
 
-		print('-' * 70)
+#		print('-' * 70)
 		print("[I] Downloading image stories. ({:d} stories detected)".format(len(list_image)))
-		print('-' * 70)
+#		print('-' * 70)
 		for index, image in enumerate(list_image):
 			filename = (image[0].split('/')[-1]).split('?', 1)[0]
 			if taken_at:
 				try:
-					final_filename = image[1] + ".jpg"
+					final_filename = "{}".format(user_to_check) + "_" + image[1] + ".jpg"
 				except:
-					final_filename = filename.split('.')[0] + ".jpg"
+					final_filename = "{}".format(user_to_check) + "_" + filename.split('.')[0] + ".jpg"
 					print("[E] Could not determine timestamp filename for this file, using default: ") + final_filename
 			else:
-				final_filename = filename.split('.')[0] + ".jpg"
-			save_path = download_dest + "/stories/{}/".format(user_to_check) + final_filename
+				final_filename = "{}".format(user_to_check) + "_" + filename.split('.')[0] + ".jpg"
+			save_path = download_dest + "/{}/".format(user_to_check) + final_filename
 			if not os.path.exists(save_path):
 				print("[I] ({:d}/{:d}) Downloading image: {:s}".format(index+1, len(list_image), final_filename))
 				try:
@@ -322,11 +319,11 @@ def get_media_story(user_to_check, user_id, ig_client, taken_at=False, no_video_
 				print("[I] Story already exists: {:s}".format(final_filename))
 
 		if (len(list_image_new) != 0) or (len(list_video_new) != 0):
-			print('-' * 70)
+#			print('-' * 70)
 			print("[I] Story downloading ended with " + str(len(list_image_new)) + " new images and " + str(
 				len(list_video_new)) + " new videos downloaded.")
 		else:
-			print('-' * 70)
+#			print('-' * 70)
 			print("[I] No new stories were downloaded.")
 	except Exception as e:
 		print("[E] A general error occurred: " + str(e))
@@ -348,7 +345,7 @@ def download_file(url, path, attempt=0):
 			download_file(url, path, attempt)
 		else: 
 			print("[E] Retry failed three times, skipping file.")
-			print('-' * 70)
+#			print('-' * 70)
 
 def command_exists(command):
 	try:
@@ -397,22 +394,22 @@ def start():
 				users_to_check = [user.rstrip('\n') for user in open(args.batchfile)]
 				if not users_to_check:
 					print("[E] The specified file is empty.")
-					print("-" * 70)
+#					print("-" * 70)
 					sys.exit(1)
 				else:
 					print("[I] downloading {:d} users from batch file.".format(len(users_to_check)))
-					print("-" * 70)
+#					print("-" * 70)
 			else:
 				print('[E] The specified file does not exist.')
-				print("-" * 70)
+#				print("-" * 70)
 				sys.exit(1)
 	else:
 		print('[E] No usernames provided. Please use the -d or -b argument.')
-		print("-" * 70)
+#		print("-" * 70)
 		sys.exit(1)
-
 	if args.username and args.password:
 		ig_client = login(args.username, args.password)
+		print("[E] login cookie.")
 	else:
 		settings_file = "credentials.json"
 		if not os.path.isfile(settings_file):
@@ -421,8 +418,7 @@ def start():
 			exit(1)
 		else:
 			ig_client = login()
-
-	print("-" * 70)
+#	print("-" * 70)
 	global download_dest
 	if args.output:
 		if os.path.isdir(args.output):
@@ -431,7 +427,7 @@ def start():
 			print("[W] Destination '{:s}' is invalid, falling back to default location.".format(args.output))
 			download_dest = os.getcwd()
 	print("[I] Files will be downloaded to {:s}".format(download_dest))
-	print("-" * 70)
+#	print("-" * 70)
 
 
 	def download_user(index, user, attempt=0):
@@ -446,8 +442,9 @@ def start():
 					raise Exception("No user is associated with the given user id.")
 				else:
 					user = user_info.get("user").get("username")
-			print("[I] Getting stories for: {:s}".format(user))
-			print('-' * 70)
+			print('=' * 30)
+			print("{:s}".format(user))
+			print('=' * 30)
 			if check_directories(user):
 				follow_res = ig_client.friendships_show(user_id)
 				if follow_res.get("is_private") and not follow_res.get("following"):
@@ -457,29 +454,29 @@ def start():
 				print("[E] Could not make required directories. Please create a 'stories' folder manually.")
 				exit(1)
 			if (index + 1) != len(users_to_check):
-				print('-' * 70)
+#				print('-' * 70)
 				print('[I] ({}/{}) 5 second time-out until next user...'.format((index + 1), len(users_to_check)))
 				time.sleep(5)
-			print('-' * 70)
+#			print('-' * 70)
 		except Exception as e:
 			if not attempt == 3:
 				attempt += 1
 				print("[E] ({:d}) Download failed: {:s}.".format(attempt, str(e)))
 				print("[W] Trying again in 5 seconds.")
 				time.sleep(5)
-				print('-' * 70)
+#				print('-' * 70)
 				download_user(index, user, attempt)
 			else: 
 				print("[E] Retry failed three times, skipping user.")
-				print('-' * 70)
+#				print('-' * 70)
 
 	for index, user_to_check in enumerate(users_to_check):
 		try:
 			download_user(index, user_to_check)
 		except KeyboardInterrupt:
-			print('-' * 70)
+#			print('-' * 70)
 			print("[I] The operation was aborted.")
-			print('-' * 70)
+#			print('-' * 70)
 			exit(0)
 	exit(0)
 
